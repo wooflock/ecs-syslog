@@ -1,17 +1,27 @@
 # patterns for SSH
+#
+#
+#
 SSH_AUTH_SUCCESS Accepted %{WORD:[ssh][auth][method]} for %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2
 SSH_AUTH_FAILED Failed %{WORD:[ssh][auth][method]} for %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2
 SSH_AUTH_FAILED_INVALID Failed %{WORD:[ssh][auth][method]} for invalid user %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2
+SSH_AUTH_FAILED_INVALID_SPACES Failed %{WORD:[ssh][auth][method]} for invalid user %{GREEDYDATA:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2
 SSH_MAX_AUTH_ATTEMPTS error: maximum authentication attempts exceeded for invalid user %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2 \[%{DATA:[ssh][session][stage]}\]
+SSH_MAX_AUTH_ATTEMPTS_USER error: maximum authentication attempts exceeded for %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2 \[%{DATA:[ssh][session][stage]}\]
+SSH_MAX_AUTH_ATTEMPTS_INVALID_SPACES error: maximum authentication attempts exceeded for invalid user %{GREEDYDATA:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2 \[%{DATA:[ssh][session][stage]}\]
 
-SSH_AUTH (%{SSH_AUTH_SUCCESS}|%{SSH_AUTH_FAILED_INVALID}|%{SSH_AUTH_FAILED}|%{SSH_MAX_AUTH_ATTEMPTS})
+SSH_AUTH (%{SSH_AUTH_SUCCESS}|%{SSH_AUTH_FAILED_INVALID}|%{SSH_AUTH_FAILED_INVALID_SPACES}|%{SSH_AUTH_FAILED}|%{SSH_MAX_AUTH_ATTEMPTS}|%{SSH_AUTH_ATTEMPTS_USER}|%{SSH_AUTH_ATTEMPTS_INVALID_SPACES})
 
 SSH_INVALID_USER Invalid user %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int}
+SSH_INVALID_USER_SPACES Invalid user %{GREEDYDATA:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int}
 SSH_DISCONNECTED_USER Disconnected from user %{USERNAME:[user][name]} %{IP:[source][ip]} port %{INT:[source][port]:int}
+SSH_DISCONNECT_AUTH_USER Disconnecting authenticating user %{USERNAME:[user][name]} %{IP:[source][ip]} port %{INT:[source][port]:int}: %{GREEDYDATA:[ssh][disconnect][reason]} \[%{DATA:[ssh][session][stage]}\]
 SSH_DISCONNECT_INVALID_USER Disconnecting invalid user %{USERNAME:[user][name]} %{IP:[source][ip]} port %{INT:[source][port]:int}: %{GREEDYDATA:[ssh][disconnect][reason]} \[%{DATA:[ssh][session][stage]}\]
+SSH_DISCONNECT_INVALID_USER_SPACES Disconnecting invalid user %{GREEDYDATA:[user][name]} %{IP:[source][ip]} port %{INT:[source][port]:int}: %{GREEDYDATA:[ssh][disconnect][reason]} \[%{DATA:[ssh][session][stage]}\]
 SSH_CONNECTION_CLOSED_USER Connection closed by %{DATA:[ssh][user][state]} user %{USERNAME:[user][name]} %{IP:[source][ip]} port %{INT:[source][port]:int}(?: \[%{DATA:[ssh][session][stage]}\])?
+SSH_CONNECTION_CLOSED Connection closed by %{IP:[source][ip]} port %{INT:[source][port]:int}
 
-SSH_USER (%{SSH_INVALID_USER}|%{SSH_DISCONNECTED_USER}|%{SSH_CONNECTION_CLOSED_USER}|%{SSH_DISCONNECT_INVALID_USER})
+SSH_USER (%{SSH_INVALID_USER}|%{SSH_INVALID_USER_SPACES}|%{SSH_DISCONNECTED_USER}|%{SSH_CONNECTION_CLOSED_USER}|%{SSH_CONNECTION_CLOSED}|%{SSH_DISCONNECT_INVALID_USER}|%{SSH_DISCONNECT_AUTH_USER}|%{SSH_DISCONNECT_INVALID_USER_SPACES})
 
 SSH_PAM_AUTH_FAILURE pam_unix\(sshd:auth\): authentication failure; %{GREEDYDATA:[ssh][pam][details]}
 SSH_PAM_MORE_FAILURES PAM %{INT:[ssh][auth][failure_count]:int} more authentication failures; %{GREEDYDATA:[ssh][pam][details]}
@@ -22,6 +32,10 @@ SSH_PAM_MAX_RETRIES PAM service\(%{DATA:[ssh][pam][service]}\) ignoring max retr
 
 SSH_PAM (%{SSH_PAM_AUTH_FAILURE}|%{SSH_PAM_MORE_FAILURES}|%{SSH_PAM_CHECK_PASS}|%{SSH_PAM_SESSION_OPENED}|%{SSH_PAM_SESSION_CLOSED}|%{SSH_PAM_MAX_RETRIES})
 
+SSH_LOGOUT_ERROR syslogin_perform_logout: logout\(\) returned an error
+SSH_MISC (%{SSH_LOGOUT_ERROR})
 
-APP_SSH (%{SSH_PAM}|%{SSH_AUTH}|%{SSH_USER})
+
+
+APP_SSH (%{SSH_PAM}|%{SSH_AUTH}|%{SSH_USER}|%{SSH_MISC})
 
