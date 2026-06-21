@@ -2,13 +2,13 @@
 SSH_AUTH_SUCCESS Accepted %{WORD:[ssh][auth][method]} for %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2
 SSH_AUTH_FAILED Failed %{WORD:[ssh][auth][method]} for %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2
 SSH_AUTH_FAILED_INVALID Failed %{WORD:[ssh][auth][method]} for invalid user %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2
-SSH_MAX_AUTH_ATTEMPTS error: maximum authentication attempts exceeded for invalid user %{USERNAME:user.name} from %{IP:source.ip} port %{INT:source.port:int} ssh2 \[%{DATA:ssh.session.stage}\]
+SSH_MAX_AUTH_ATTEMPTS error: maximum authentication attempts exceeded for invalid user %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2 \[%{DATA:[ssh][session][stage]}\]
 
 SSH_AUTH (%{SSH_AUTH_SUCCESS}|%{SSH_AUTH_FAILED}|%{SSH_AUTH_FAILED_INVALID}|%{SSH_MAX_AUTH_ATTEMPTS})
 
 SSH_INVALID_USER Invalid user %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int}
 SSH_DISCONNECTED_USER Disconnected from user %{USERNAME:[user][name]} %{IP:[source][ip]} port %{INT:[source][port]:int}
-SSH_DISCONNECT_INVALID_USER Disconnecting invalid user %{USERNAME:user.name} %{IP:source.ip} port %{INT:source.port:int}: %{GREEDYDATA:ssh.disconnect.reason} \[%{DATA:ssh.session.stage}\]
+SSH_DISCONNECT_INVALID_USER Disconnecting invalid user %{USERNAME:[user][name]} %{IP:[source][ip]} port %{INT:[source][port]:int}: %{GREEDYDATA:[ssh][disconnect][reason]} \[%{DATA:[ssh][session][stage]}\]
 SSH_CONNECTION_CLOSED_USER Connection closed by %{DATA:[ssh][user][state]} user %{USERNAME:[user][name]} %{IP:[source][ip]} port %{INT:[source][port]:int}(?: \[%{DATA:[ssh][session][stage]}\])?
 
 SSH_USER (%{SSH_INVALID_USER}|%{SSH_DISCONNECTED_USER}|%{SSH_CONNECTION_CLOSED_USER}|%{SSH_DISCONNECT_INVALID_USER})
@@ -18,7 +18,7 @@ SSH_PAM_MORE_FAILURES PAM %{INT:[ssh][auth][failure_count]:int} more authenticat
 SSH_PAM_CHECK_PASS pam_unix\(sshd:auth\): check pass; user unknown
 SSH_PAM_SESSION_OPENED pam_unix\(sshd.session\): session opened for user %{USERNAME:[user][name]}\(uid=%{INT:[user][id]:int}\) by %{USERNAME:[ssh][session][by_user]}\(uid=%{INT:[ssh][session][by_uid]:int}\)
 SSH_PAM_SESSION_CLOSED pam_unix\(sshd.session\): session closed for user %{USERNAME:[user][name]}
-SSH_PAM_MAX_RETRIES PAM service\(%{DATA:ssh.pam.service}\) ignoring max retries; %{INT:ssh.auth.max_retries_seen:int} > %{INT:ssh.auth.max_retries_allowed:int}
+SSH_PAM_MAX_RETRIES PAM service\(%{DATA:[ssh][pam][service]}\) ignoring max retries; %{INT:[ssh][auth][max_retries_seen]:int} > %{INT:[ssh][auth][max_retries_allowed]:int}
 
 SSH_PAM (%{SSH_PAM_AUTH_FAILURE}|%{SSH_PAM_MORE_FAILURES}|%{SSH_PAM_CHECK_PASS}|%{SSH_PAM_SESSION_OPENED}|%{SSH_PAM_SESSION_CLOSED}|%{SSH_PAM_MAX_RETRIES})
 
