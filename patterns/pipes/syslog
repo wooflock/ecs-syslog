@@ -1,0 +1,7 @@
+# pattern for detecting rsyslog for linux
+# when sent through udp or tcp from the rsyslog
+
+# timestamps can be tricky. i hope i got them all.
+
+SYSLOG_TS (?:%{TIMESTAMP_ISO8601}|%{MONTHDAY}/%{MONTH}/%{YEAR}:%{TIME} %{ISO8601_TIMEZONE}|%{YEAR}-%{MONTHNUM}-%{MONTHDAY} %{TIME}|%{SYSLOGTIMESTAMP})
+
