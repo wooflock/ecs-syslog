@@ -1,0 +1,15 @@
+# sudo command execution
+SUDO_COMMAND %{USERNAME:[user][name]} : TTY=%{DATA:[process][tty][name]} ; PWD=%{DATA:[process][working_directory]} ; USER=%{USERNAME:[user][effective][name]} ; COMMAND=%{GREEDYDATA:[process][command_line]}
+
+# sudo command with failed password attempts
+SUDO_INCORRECT_PASSWORD %{USERNAME:[user][name]} : %{INT:[sudo][auth][attempts]:int} incorrect password attempts ; TTY=%{DATA:[process][tty][name]} ; PWD=%{DATA:[process][working_directory]} ; USER=%{USERNAME:[user][effective][name]} ; COMMAND=%{GREEDYDATA:[process][command_line]}
+
+# PAM auth failure
+SUDO_PAM_AUTH_FAILURE pam_unix\(%{DATA:[sudo][pam][service]}:auth\): authentication failure; logname=%{USERNAME:[user][name]} uid=%{INT:[user][id]:int} euid=%{INT:[user][effective][id]:int} tty=%{DATA:[process][tty][path]} ruser=%{USERNAME:[user][target][name]} rhost=%{DATA:[source][address]} user=%{USERNAME:[user][name]}
+
+# PAM session opened / closed
+SUDO_PAM_SESSION_OPENED pam_unix\(%{DATA:[sudo][pam][service]}:session\): session opened for user %{USERNAME:[user][effective][name]}\(uid=%{INT:[user][effective][id]:int}\) by %{USERNAME:[user][name]}\(uid=%{INT:[user][id]:int}\)
+
+SUDO_PAM_SESSION_CLOSED pam_unix\(%{DATA:[sudo][pam][service]}:session\): session closed for user %{USERNAME:[user][effective][name]}
+
+APP_SUDO (%{SUDO_INCORRECT_PASSWORD}|%{SUDO_COMMAND}|%{SUDO_PAM_AUTH_FAILURE}|%{SUDO_PAM_SESSION_OPENED}|%{SUDO_PAM_SESSION_CLOSED})
