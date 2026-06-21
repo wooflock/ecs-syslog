@@ -10,7 +10,7 @@ SSH_MAX_AUTH_ATTEMPTS error: maximum authentication attempts exceeded for invali
 SSH_MAX_AUTH_ATTEMPTS_USER error: maximum authentication attempts exceeded for %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2 \[%{DATA:[ssh][session][stage]}\]
 SSH_MAX_AUTH_ATTEMPTS_INVALID_SPACES error: maximum authentication attempts exceeded for invalid user %{GREEDYDATA:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int} ssh2 \[%{DATA:[ssh][session][stage]}\]
 
-SSH_AUTH (%{SSH_AUTH_SUCCESS}|%{SSH_AUTH_FAILED_INVALID}|%{SSH_AUTH_FAILED_INVALID_SPACES}|%{SSH_AUTH_FAILED}|%{SSH_MAX_AUTH_ATTEMPTS}|%{SSH_AUTH_ATTEMPTS_USER}|%{SSH_AUTH_ATTEMPTS_INVALID_SPACES})
+SSH_AUTH (%{SSH_AUTH_SUCCESS}|%{SSH_AUTH_FAILED_INVALID}|%{SSH_AUTH_FAILED_INVALID_SPACES}|%{SSH_AUTH_FAILED}|%{SSH_MAX_AUTH_ATTEMPTS}|%{SSH_MAX_AUTH_ATTEMPTS_USER}|%{SSH_MAX_AUTH_ATTEMPTS_INVALID_SPACES})
 
 SSH_INVALID_USER Invalid user %{USERNAME:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int}
 SSH_INVALID_USER_SPACES Invalid user %{GREEDYDATA:[user][name]} from %{IP:[source][ip]} port %{INT:[source][port]:int}
