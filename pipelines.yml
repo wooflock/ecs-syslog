@@ -12,6 +12,8 @@
   path.config: "/etc/logstash/conf.d/03-ssh.conf"
 - pipeline.id: sudo
   path.config: "/etc/logstash/conf.d/03-sudo.conf"
+- pipeline.id: linux-wpa-supplicant
+  path.config: "/etc/logstash/conf.d/03-linux-wpa-supplicant.conf"
 - pipeline.id: output
   path.config: "/etc/logstash/conf.d/10-output.conf"
 

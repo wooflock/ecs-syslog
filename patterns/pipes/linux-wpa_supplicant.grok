@@ -1,0 +1,6 @@
+
+# wlp108s0: WPA: Group rekeying completed with b6:77:59:e8:cb:ae [GTK=CCMP]
+
+WPA_GROUP_REKEY %{DATA:[network][interface][name]}: WPA: Group rekeying completed with %{MAC:[wpa][bssid]} \[GTK=%{DATA:[wpa][gtk][cipher]}\]
+
+APP_WPA_SUPPLICANT (%{WPA_GROUP_REKEY})
