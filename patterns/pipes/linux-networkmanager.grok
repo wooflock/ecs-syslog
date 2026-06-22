@@ -1,0 +1,33 @@
+# manager
+# device
+# dhcp4
+# Wi-Fi
+# policy
+# Config
+
+# [networkmanager][level] == info
+# [networkmanager[time] == [178xxxx]
+# [networkmanager[subsystem] manager
+# [networkmanager[message] NetworkManager state is now ASLEEP
+#
+
+
+NM_PREFIX <%{LOGLEVEL:[log][level]}> +\[%{NUMBER:[networkmanager][timestamp]:float}\]
+
+# manager:
+NM_MANAGER manager\: %{GREEDYDATA}
+
+# device:
+NM_DEVICE_SET_HW_ADDR device \(%{WORD:[networkmanager][device]}\)\: set-hw-addr\: %{WORD} MAC address to %{MAC:[networkmanager][mac]} \(%{WORD}\)
+NM_DEVICE_ACTIVATION device \(%{WORD:[networkmanager][device]}\)\: Activation\: \(wifi\) connection \'%{WORD:[networkmanager][sidname]}\' %{GREEDYDATA}
+NM_DEVICE_STATE device \(%{WORD:[networkmanager][device]}\)\: %{GREEDYDATA} 
+NM_DEVICE (%{NM_DEVICE_SET_HW_ADDR}|%{NM_DEVICE_ACTIVATION}|%{NM_DEVICE_STATE})
+
+# dhcp
+NM_DHCP4_LEASE dhcp4 \(%{DATA:[newtwork][interface][name]}\): state changed new lease, address=%{IP:[host][ip]}
+
+# group all the above
+NM_SUBSYSTEM (%{NM_MANAGER}|%{NM_DEVICE}|%{NM_DHCP4_LEASE})
+
+APP_NETWORKMANAGER %{NM_PREFIX} %{NM_SUBSYSTEM:[networkmanager][subsystem]}
+
