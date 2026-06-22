@@ -1,35 +1,202 @@
-# ecs-syslog
-syslog patterns for linux syslog
+# ECS Syslog
 
-small project to create a pipeline pattern to handle linux applications sent by rsyslog.
+ECS Syslog is a Logstash-based syslog processing framework that converts traditional Linux syslog messages into structured, ECS-compliant JSON events.
 
-the pipelines are set up in such a fashion that an event that reaches the input pipeline 
-will be branched to reach the correct pipeline with rules specially for that application.
+The project is designed around a modular pipeline architecture where incoming syslog messages are parsed by application-specific pipelines before being enriched and forwarded to a common output pipeline.
 
-a server is set up to send syslog data to the input logstash filter at the port
-specified by the input pipeline.
+The goal is to provide a reusable and extensible foundation for building centralized logging solutions for Linux systems and applications.
 
-syslog udp/tcp -> logstash_input_pipeline
+## Example
 
-the input pipeline sends the data to the syslog pipeline, this is so i can expand later
-and add other forms such as beat, or other pipelines.
+A traditional syslog message such as:
 
-logstash/input_pipeline -> syslog_pipeline
+```text
+<85>Jun 21 23:46:43 hpelitebook sudo: pam_unix(sudo:auth): authentication failure; logname=wooflock uid=1000 euid=0 tty=/dev/pts/7 ruser=wooflock rhost= user=wooflock
+```
 
-The syslog pipeline parses the syslog data, and takes care of timestamps, hostnames
-facility, etc. It also looks at what application sent the event and populates the
-[log][syslog] fields.
-Depending on what [log][syslog][appname] the syslog pipeline sends it to a 
-pipeline for that application, that inderstands what [event][success] etc are for the 
-diffrent events from the app.
+is transformed into structured ECS-compliant JSON:
 
-right now it has a pipeline for sshd, and some other applications. more to come.
+```json
+{
+  "@timestamp": "2026-06-21T21:46:43.000Z",
+  "ecs": {
+    "version": "8.17.0"
+  },
+  "host": {
+    "name": "hpelitebook",
+    "hostname": "hpelitebook"
+  },
+  "log": {
+    "syslog": {
+      "hostname": "hpelitebook",
+      "appname": "sudo",
+      "facility": {
+        "code": 1,
+        "name": "user-level"
+      },
+      "severity": {
+        "code": 5,
+        "name": "notice"
+      }
+    }
+  },
+  "event": {
+    "category": ["authentication"],
+    "type": ["denied", "user"],
+    "action": "sudo_authentication_failure",
+    "outcome": "failure"
+  },
+  "user": {
+    "name": "wooflock",
+    "id": 1000
+  },
+  "service": {
+    "name": "sudo",
+    "type": "sudo"
+  },
+  "process": {
+    "name": "sudo"
+  }
+}
+```
 
-After the application pipeline, it gets sent to output pipeline.
-the output pipeline handle some very general rules that are the same for many pipelines.
+This makes logs easier to search, correlate, and analyze across different applications and systems.
 
-the idea is to provide a good list of applications that are parsed, and provide them
-in a pipeline format so they can be dropped in and placed in your loggflows.
-each pipeline can also be placed on its own logstash instance, and communicate through 
-IP. input and output filters can be changed to read data/write from kafka, or something else
+## Features
+
+- Receives syslog messages over UDP and TCP
+- Parses RFC3164-style syslog messages
+- Produces Elastic Common Schema (ECS) compliant JSON
+- Application-specific parsing pipelines
+- Common output and enrichment pipeline
+- Easy to extend with new application parsers
+
+## Architecture
+
+The processing flow consists currently of three stages:
+
+```text
+Syslog Input
+     │
+     ▼
+Syslog Pipeline
+     │
+     ├── SSH Pipeline
+     ├── Sudo Pipeline
+     ├── NetworkManager Pipeline
+     ├── WPA Supplicant Pipeline
+     └── Additional Application Pipelines
+     │
+     ▼
+Output Pipeline
+     │
+     ▼
+JSON Output
+```
+
+### 1. Syslog Pipeline
+
+The syslog pipeline is responsible for:
+
+- Receiving raw syslog messages
+- Parsing RFC3164 headers
+- Extracting timestamps, hostname, facility and severity
+- Creating common ECS fields
+- Routing events to application-specific pipelines
+
+### 2. Application Pipelines
+
+Each application pipeline is responsible for understanding the log format of a specific application and enriching the event with ECS fields.
+
+Currently implemented parsers include:
+
+| Application | Purpose |
+|------------|---------|
+| SSH | Authentication, session tracking and connection events |
+| Sudo | Privilege escalation and command execution |
+| NetworkManager | DHCP and network state events |
+| WPA Supplicant | Wireless authentication and key management events |
+
+Application pipelines are intentionally isolated so that parsing logic remains easy to maintain and extend.
+
+### 3. Output Pipeline
+
+The output pipeline performs common post-processing and enrichment that applies to all applications.
+
+Examples include:
+
+- ECS normalization
+- Event enrichment
+- Shared field handling
+- Final JSON output formatting
+
+## ECS Compliance
+
+The project follows the Elastic Common Schema (ECS) wherever practical.
+
+Examples of ECS fields generated by the pipelines include:
+
+- `event.category`
+- `event.type`
+- `event.action`
+- `event.outcome`
+- `event.severity`
+- `user.*`
+- `process.*`
+- `host.*`
+- `source.*`
+- `destination.*`
+- `network.*`
+- `service.*`
+
+Application-specific fields are preserved under their own namespaces when ECS does not provide a suitable field.
+
+## Design Principles
+
+### Keep Parsing Local
+
+Application-specific knowledge belongs in the application pipeline.
+
+For example:
+
+- SSH events are classified in the SSH pipeline
+- Sudo events are classified in the Sudo pipeline
+- NetworkManager events are classified in the NetworkManager pipeline
+- WPA Supplicant events are classified in the WPA Supplicant pipeline
+
+### Keep Shared Logic Central
+
+Logic that applies to all applications belongs in the output pipeline.
+
+This keeps application parsers focused on parsing while maintaining consistent ECS output.
+
+### Preserve Original Data
+
+Where possible, original values are preserved while ECS-compatible fields are added.
+
+For example:
+
+```json
+{
+  "wpa": {
+    "bssid": "b6:77:59:e8:cb:ae"
+  },
+  "destination": {
+    "mac": "b6:77:59:e8:cb:ae"
+  }
+}
+```
+
+## Current Status
+
+This project is actively being developed and expanded.
+
+Additional application pipelines and parsing rules will be added over time as new log sources are encountered and analyzed.
+
+## Contributing
+
+Contributions, bug reports and additional application parsers are welcome.
+
+The easiest way to contribute is to provide sample log messages together with the desired ECS output structure.
+
 
