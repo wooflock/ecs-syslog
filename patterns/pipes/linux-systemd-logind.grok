@@ -1,0 +1,6 @@
+SYSTEMD_LOGIND_NEW_SESSION New session %{INT:[systemd][session][id]:int} of user %{USERNAME:[user][name]}\.
+SYSTEMD_LOGIND_SESSION_LOGGED_OUT Session %{INT:[systemd][session][id]:int} logged out\. Waiting for processes to exit\.
+SYSTEMD_LOGIND_SESSION_REMOVED Removed session %{INT:[systemd][session][id]:int}\.
+
+APP_SYSTEMD_LOGIND (%{SYSTEMD_LOGIND_NEW_SESSION}|%{SYSTEMD_LOGIND_SESSION_LOGGED_OUT}|%{SYSTEMD_LOGIND_SESSION_REMOVED})
+
