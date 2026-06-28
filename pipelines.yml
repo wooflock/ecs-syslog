@@ -16,6 +16,8 @@
   path.config: "/etc/logstash/conf.d/03-linux-wpa-supplicant.conf"
 - pipeline.id: linux-systemd-logind
   path.config: "/etc/logstash/conf.d/03-linux-systemd-logind.conf"
+- pipeline.id: linux-unix-chkpwd
+  path.config: "/etc/logstash/conf.d/03-linux-unix-chkpwd.conf"
 - pipeline.id: output
   path.config: "/etc/logstash/conf.d/10-output.conf"
 

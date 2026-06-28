@@ -1,0 +1,5 @@
+UNIX_CHKPWD_USER_UNKNOWN check pass; user unknown
+UNIX_CHKPWD_PASSWORD_FAILED password check failed for user \(%{USERNAME:[user][name]}\)
+
+APP_UNIX_CHKPWD (%{UNIX_CHKPWD_PASSWORD_FAILED}|%{UNIX_CHKPWD_USER_UNKNOWN})
+

@@ -1,7 +1,7 @@
 # this is the input to ssh. All input goes through here and selected 
 # to go to some other pipeline.
 
-input { pipeline { address => "linux-wpa-supplicant" } }
+input { pipeline { address => "linux-unix-chkpwd" } }
 
 # events in ecs that we place here relevant on this level.
 # [error][message]
@@ -30,39 +30,52 @@ input { pipeline { address => "linux-wpa-supplicant" } }
 
 filter {
   grok {
-    id => "grok_wpa_supplicant_parse"
+    id => "grok_unix_chkpwd_parse"
     patterns_dir => ["/etc/logstash/patterns/pipes"]
     match => {
-      "syslog_message" => "%{APP_WPA_SUPPLICANT}"
+      "syslog_message" => "%{APP_UNIX_CHKPWD}"
     }
-    tag_on_failure => ["_grokfail:pipeline=linux-wpa-supplicant:filter=grok_wpa_supplicant_parse"]
+    tag_on_failure => ["_grokfail:pipeline=linux-unix-chkpwd:filter=grok_unix_chkpwd_parse"]
   }
 
   # adding the higher level event fields
   mutate {
     add_field => {
       "[event][module]" => "linux"
-      "[event][dataset]" => "linux.wpa_supplicant"
-      "[service][type]" => "wpa_supplicant"
-      "[service][name]" => "wpa_supplicant"
-      "[network][protocol]" => "wifi"
+      "[event][dataset]" => "linux.unix_chkpwd"
+      "[service][type]" => "unix_chkpwd"
+      "[service][name]" => "unix_chkpwd"
     }
-  } # we use ruby to set array items since this works on most logstashversions
-  ruby {
-    code => '
-      event.set("[event][type]", ["change"])
-      event.set("[event][category]", ["network"])
-    '
   }
 
-  if [wpa][bssid] {
+  if [syslog_message] ~ /^check pass; user unknown/ {
     mutate {
-      copy => {
-        "[wpa][bssid]" => "[destination][mac]"
+      add_field => {
+        "[event][action]" => "unix_chkpwd_user_unknown"
+        "[event][outcome]" => "failure"
       }
     }
+    # we use ruby to set array items since this works on most logstashversions
+    ruby {
+      code => '
+        event.set("[event][type]", ["denied"])
+        event.set("[event][category]", ["authentication"])
+      '
+    }
+  } else if [syslog_message] =~ /^password check failed for user/ {
+    mutate {
+      add_field => {
+        "[event][action]" => "unix_chkpwd_password_check_failed"
+        "[event][outcome]" => "failure"
+      }
+    }
+    ruby {
+      code => '
+        event.set("[event][type]", ["denied","user"])
+        event.set("[event][category]", ["authentication"])
+      '
+    }
   }
-
 }
 
 output {
